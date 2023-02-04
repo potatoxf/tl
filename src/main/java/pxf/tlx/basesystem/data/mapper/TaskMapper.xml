@@ -1,0 +1,501 @@
+<?xml version="1.0" encoding="UTF-8" ?><!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="pxf.tlx.basesystem.data.mapper.TaskMapper">
+    <!--***************************************************TaskError***************************************************-->
+
+    <resultMap id="RM_TaskError" type="pxf.tlx.basesystem.data.entity.TaskError">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="task_record_id" jdbcType="INTEGER" property="taskRecordId"/>
+        <result column="error_key" jdbcType="VARCHAR" property="errorKey"/>
+        <result column="error_value" jdbcType="LONGVARCHAR" property="errorValue"/>
+        <result column="created_time" jdbcType="BIGINT" property="createdTime"/>
+        <result column="updated_time" jdbcType="BIGINT" property="updatedTime"/>
+    </resultMap>
+    <sql id="TaskError_Columns">
+        id,
+        task_record_id,
+        error_key,
+        error_value,
+        created_time,
+        updated_time
+    </sql>
+    <select id="getTaskErrorByRecordId" parameterType="java.lang.String" resultType="pxf.tlx.basesystem.data.entity.TaskError">
+        select
+        <include refid="TaskError_Columns"/>
+        from base_task_error
+        where task_record_id = #{recordId,jdbcType=INTEGER}
+    </select>
+    <select id="getTaskErrorById" parameterType="java.lang.Integer" resultMap="RM_TaskError">
+        select
+        <include refid="TaskError_Columns"/>
+        from base_task_error
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="removeTaskErrorById" parameterType="java.lang.Integer">
+        delete
+        from base_task_error
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="addTaskError" keyColumn="id" keyProperty="id" parameterType="pxf.tlx.basesystem.data.entity.TaskError" useGeneratedKeys="true">
+        insert into base_task_error (task_record_id, error_key, error_value,
+                                     created_time, updated_time)
+        values (#{taskRecordId,jdbcType=INTEGER}, #{errorKey,jdbcType=VARCHAR}, #{errorValue,jdbcType=LONGVARCHAR},
+                #{createdTime,jdbcType=BIGINT}, #{updatedTime,jdbcType=BIGINT})
+    </insert>
+    <insert id="addTaskErrorSelective" keyColumn="id" keyProperty="id" parameterType="pxf.tlx.basesystem.data.entity.TaskError" useGeneratedKeys="true">
+        insert into base_task_error
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="taskRecordId != null">
+                task_record_id,
+            </if>
+            <if test="errorKey != null">
+                error_key,
+            </if>
+            <if test="errorValue != null">
+                error_value,
+            </if>
+            <if test="createdTime != null">
+                created_time,
+            </if>
+            <if test="updatedTime != null">
+                updated_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="taskRecordId != null">
+                #{taskRecordId,jdbcType=INTEGER},
+            </if>
+            <if test="errorKey != null">
+                #{errorKey,jdbcType=VARCHAR},
+            </if>
+            <if test="errorValue != null">
+                #{errorValue,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="createdTime != null">
+                #{createdTime,jdbcType=BIGINT},
+            </if>
+            <if test="updatedTime != null">
+                #{updatedTime,jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
+    <update id="modifyTaskErrorById" parameterType="pxf.tlx.basesystem.data.entity.TaskError">
+        update base_task_error
+        set task_record_id = #{taskRecordId,jdbcType=INTEGER},
+            error_key      = #{errorKey,jdbcType=VARCHAR},
+            error_value    = #{errorValue,jdbcType=LONGVARCHAR},
+            created_time   = #{createdTime,jdbcType=BIGINT},
+            updated_time   = #{updatedTime,jdbcType=BIGINT}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="modifyTaskErrorByIdSelective" parameterType="pxf.tlx.basesystem.data.entity.TaskError">
+        update base_task_error
+        <set>
+            <if test="taskRecordId != null">
+                task_record_id = #{taskRecordId,jdbcType=INTEGER},
+            </if>
+            <if test="errorKey != null">
+                error_key = #{errorKey,jdbcType=VARCHAR},
+            </if>
+            <if test="errorValue != null">
+                error_value = #{errorValue,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="createdTime != null">
+                created_time = #{createdTime,jdbcType=BIGINT},
+            </if>
+            <if test="updatedTime != null">
+                updated_time = #{updatedTime,jdbcType=BIGINT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <!--***************************************************TaskInformation***************************************************-->
+
+    <resultMap id="RM_TaskInformation" type="pxf.tlx.basesystem.data.entity.TaskInformation">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="task_no" jdbcType="VARCHAR" property="taskNo"/>
+        <result column="task_name" jdbcType="VARCHAR" property="taskName"/>
+        <result column="scheduler_rule" jdbcType="VARCHAR" property="schedulerRule"/>
+        <result column="executor_no" jdbcType="VARCHAR" property="executorNo"/>
+        <result column="send_type" jdbcType="TINYINT" property="sendType"/>
+        <result column="url" jdbcType="VARCHAR" property="url"/>
+        <result column="execute_parameter" jdbcType="VARCHAR" property="executeParameter"/>
+        <result column="time_key" jdbcType="VARCHAR" property="timeKey"/>
+        <result column="frozen_time" jdbcType="BIGINT" property="frozenTime"/>
+        <result column="unfrozen_time" jdbcType="BIGINT" property="unfrozenTime"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="version" jdbcType="INTEGER" property="version"/>
+        <result column="created_time" jdbcType="BIGINT" property="createdTime"/>
+        <result column="updated_time" jdbcType="BIGINT" property="updatedTime"/>
+    </resultMap>
+    <sql id="TaskInformation_Columns">
+        id,
+        task_no,
+        task_name,
+        scheduler_rule,
+        executor_no,
+        send_type,
+        url,
+        execute_parameter,
+        time_key,
+        frozen_time,
+        unfrozen_time,
+        `status`,
+        version,
+        created_time,
+        updated_time
+    </sql>
+    <select id="lookupTaskInformation" parameterType="java.util.HashMap" resultMap="RM_TaskInformation">
+        select
+        <include refid="TaskInformation_Columns"/>
+        from base_task_information
+        <if test="taskNo != null">
+            <where>
+                task_no = #{taskNo}
+            </where>
+        </if>
+        order by id desc limit #{startIndex}, 10;
+    </select>
+    <select id="listTaskInformationByStatus" parameterType="pxf.tlx.basesystem.TaskStatus" resultMap="RM_TaskInformation">
+        select
+        <include refid="TaskInformation_Columns"/>
+        from base_task_information
+        where frozenStatus = #{frozenStatus}
+    </select>
+    <select id="countTaskInformationByTaskNo" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(0)
+        from base_task_information
+        where task_no = #{taskNo,jdbcType=VARCHAR}
+    </select>
+    <select id="getTaskInformationByTaskNo" parameterType="java.lang.String" resultMap="RM_TaskInformation">
+        select
+        <include refid="TaskInformation_Columns"/>
+        from base_task_information
+        where task_no = #{taskNo,jdbcType=VARCHAR}
+    </select>
+    <select id="getTaskInformationById" parameterType="java.lang.Integer" resultMap="RM_TaskInformation">
+        select
+        <include refid="TaskInformation_Columns"/>
+        from base_task_information
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="removeTaskInformationById" parameterType="java.lang.Integer">
+        delete
+        from base_task_information
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="addTaskInformation" keyColumn="id" keyProperty="id" parameterType="pxf.tlx.basesystem.data.entity.TaskInformation" useGeneratedKeys="true">
+        insert into base_task_information (task_no, task_name, scheduler_rule,
+                                           executor_no, send_type, url,
+                                           execute_parameter, time_key, frozen_time,
+                                           unfrozen_time, `status`, version,
+                                           created_time, updated_time)
+        values (#{taskNo,jdbcType=VARCHAR}, #{taskName,jdbcType=VARCHAR}, #{schedulerRule,jdbcType=VARCHAR},
+                #{executorNo,jdbcType=VARCHAR}, #{sendType,jdbcType=TINYINT}, #{url,jdbcType=VARCHAR},
+                #{executeParameter,jdbcType=VARCHAR}, #{timeKey,jdbcType=VARCHAR}, #{frozenTime,jdbcType=BIGINT},
+                #{unfrozenTime,jdbcType=BIGINT}, #{status,jdbcType=TINYINT}, #{version,jdbcType=INTEGER},
+                #{createTime,jdbcType=BIGINT}, #{updatedTime,jdbcType=BIGINT})
+    </insert>
+    <insert id="addTaskInformationSelective" keyColumn="id" keyProperty="id" parameterType="pxf.tlx.basesystem.data.entity.TaskInformation" useGeneratedKeys="true">
+        insert into base_task_information
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="taskNo != null">
+                task_no,
+            </if>
+            <if test="taskName != null">
+                task_name,
+            </if>
+            <if test="schedulerRule != null">
+                scheduler_rule,
+            </if>
+            <if test="executorNo != null">
+                executor_no,
+            </if>
+            <if test="sendType != null">
+                send_type,
+            </if>
+            <if test="url != null">
+                url,
+            </if>
+            <if test="executeParameter != null">
+                execute_parameter,
+            </if>
+            <if test="timeKey != null">
+                time_key,
+            </if>
+            <if test="frozenTime != null">
+                frozen_time,
+            </if>
+            <if test="unfrozenTime != null">
+                unfrozen_time,
+            </if>
+            <if test="status != null">
+                `status`,
+            </if>
+            <if test="version != null">
+                version,
+            </if>
+            <if test="createTime != null">
+                created_time,
+            </if>
+            <if test="updatedTime != null">
+                updated_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="taskNo != null">
+                #{taskNo,jdbcType=VARCHAR},
+            </if>
+            <if test="taskName != null">
+                #{taskName,jdbcType=VARCHAR},
+            </if>
+            <if test="schedulerRule != null">
+                #{schedulerRule,jdbcType=VARCHAR},
+            </if>
+            <if test="executorNo != null">
+                #{executorNo,jdbcType=VARCHAR},
+            </if>
+            <if test="sendType != null">
+                #{sendType,jdbcType=TINYINT},
+            </if>
+            <if test="url != null">
+                #{url,jdbcType=VARCHAR},
+            </if>
+            <if test="executeParameter != null">
+                #{executeParameter,jdbcType=VARCHAR},
+            </if>
+            <if test="timeKey != null">
+                #{timeKey,jdbcType=VARCHAR},
+            </if>
+            <if test="frozenTime != null">
+                #{frozenTime,jdbcType=BIGINT},
+            </if>
+            <if test="unfrozenTime != null">
+                #{unfrozenTime,jdbcType=BIGINT},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=TINYINT},
+            </if>
+            <if test="version != null">
+                #{version,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                #{createTime,jdbcType=BIGINT},
+            </if>
+            <if test="updatedTime != null">
+                #{updatedTime,jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
+    <update id="modifyTaskInformationByIdSelective" parameterType="pxf.tlx.basesystem.data.entity.TaskInformation">
+        update base_task_information
+        <set>
+            <if test="taskNo != null">
+                task_no = #{taskNo,jdbcType=VARCHAR},
+            </if>
+            <if test="taskName != null">
+                task_name = #{taskName,jdbcType=VARCHAR},
+            </if>
+            <if test="schedulerRule != null">
+                scheduler_rule = #{schedulerRule,jdbcType=VARCHAR},
+            </if>
+            <if test="executorNo != null">
+                executor_no = #{executorNo,jdbcType=VARCHAR},
+            </if>
+            <if test="sendType != null">
+                send_type = #{sendType,jdbcType=TINYINT},
+            </if>
+            <if test="url != null">
+                url = #{url,jdbcType=VARCHAR},
+            </if>
+            <if test="executeParameter != null">
+                execute_parameter = #{executeParameter,jdbcType=VARCHAR},
+            </if>
+            <if test="timeKey != null">
+                time_key = #{timeKey,jdbcType=VARCHAR},
+            </if>
+            <if test="frozenTime != null">
+                frozen_time = #{frozenTime,jdbcType=BIGINT},
+            </if>
+            <if test="unfrozenTime != null">
+                unfrozen_time = #{unfrozenTime,jdbcType=BIGINT},
+            </if>
+            <if test="status != null">
+                `status` = #{status,jdbcType=TINYINT},
+            </if>
+            <if test="version != null">
+                version = #{version,jdbcType=INTEGER},
+            </if>
+            <if test="createTime != null">
+                created_time = #{createTime,jdbcType=BIGINT},
+            </if>
+            <if test="updatedTime != null">
+                updated_time = #{updatedTime,jdbcType=BIGINT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="modifyTaskInformationById" parameterType="pxf.tlx.basesystem.data.entity.TaskInformation">
+        update base_task_information
+        set task_no           = #{taskNo,jdbcType=VARCHAR},
+            task_name         = #{taskName,jdbcType=VARCHAR},
+            scheduler_rule    = #{schedulerRule,jdbcType=VARCHAR},
+            executor_no       = #{executorNo,jdbcType=VARCHAR},
+            send_type         = #{sendType,jdbcType=TINYINT},
+            url               = #{url,jdbcType=VARCHAR},
+            execute_parameter = #{executeParameter,jdbcType=VARCHAR},
+            time_key          = #{timeKey,jdbcType=VARCHAR},
+            frozen_time       = #{frozenTime,jdbcType=BIGINT},
+            unfrozen_time     = #{unfrozenTime,jdbcType=BIGINT},
+            `status`          = #{status,jdbcType=TINYINT},
+            version           = #{version,jdbcType=INTEGER},
+            created_time      = #{createTime,jdbcType=BIGINT},
+            updated_time      = #{updatedTime,jdbcType=BIGINT}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <!--***************************************************TaskRecord***************************************************-->
+
+    <resultMap id="RM_TaskRecord" type="pxf.tlx.basesystem.data.entity.TaskRecord">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="task_no" jdbcType="VARCHAR" property="taskNo"/>
+        <result column="time_key" jdbcType="VARCHAR" property="timeKey"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="fail_count" jdbcType="INTEGER" property="failCount"/>
+        <result column="fail_reason" jdbcType="VARCHAR" property="failReason"/>
+        <result column="execute_time" jdbcType="BIGINT" property="executeTime"/>
+        <result column="created_time" jdbcType="BIGINT" property="createdTime"/>
+        <result column="updated_time" jdbcType="BIGINT" property="updatedTime"/>
+    </resultMap>
+    <sql id="TaskRecord_Columns">
+        id,
+        task_no,
+        time_key,
+        status,
+        fail_count,
+        fail_reason,
+        execute_time,
+        created_time,
+        updated_time
+    </sql>
+    <select id="listTaskRecordByTaskNo" parameterType="java.lang.String" resultMap="RM_TaskRecord">
+        select
+        <include refid="TaskRecord_Columns"/>
+        from base_task_record
+        where task_no = #{taskNo}
+    </select>
+    <select id="getTaskRecordById" parameterType="java.lang.Integer" resultMap="RM_TaskRecord">
+        select
+        <include refid="TaskRecord_Columns"/>
+        from base_task_record
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="removeTaskRecordById" parameterType="java.lang.Integer">
+        delete
+        from base_task_record
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="addTaskRecord" keyColumn="id" keyProperty="id" parameterType="pxf.tlx.basesystem.data.entity.TaskRecord" useGeneratedKeys="true">
+        insert into base_task_record (<include refid="TaskRecord_Columns"/>)
+            values (#{taskNo,jdbcType=VARCHAR}, #{timeKey,jdbcType=VARCHAR}, #{status,jdbcType=TINYINT},
+                    #{failCount,jdbcType=INTEGER}, #{failReason,jdbcType=VARCHAR}, #{executeTime,jdbcType=BIGINT},
+                    #{createdTime,jdbcType=BIGINT}, #{updatedTime,jdbcType=BIGINT})
+    </insert>
+    <insert id="addTaskRecordSelective" keyColumn="id" keyProperty="id" parameterType="pxf.tlx.basesystem.data.entity.TaskRecord" useGeneratedKeys="true">
+        insert into base_task_record
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="taskNo != null">
+                task_no,
+            </if>
+            <if test="timeKey != null">
+                time_key,
+            </if>
+            <if test="status != null">
+                `status`,
+            </if>
+            <if test="failCount != null">
+                fail_count,
+            </if>
+            <if test="failReason != null">
+                fail_reason,
+            </if>
+            <if test="executeTime != null">
+                execute_time,
+            </if>
+            <if test="createdTime != null">
+                created_time,
+            </if>
+            <if test="updatedTime != null">
+                updated_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="taskNo != null">
+                #{taskNo,jdbcType=VARCHAR},
+            </if>
+            <if test="timeKey != null">
+                #{timeKey,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                #{status,jdbcType=TINYINT},
+            </if>
+            <if test="failCount != null">
+                #{failCount,jdbcType=INTEGER},
+            </if>
+            <if test="failReason != null">
+                #{failReason,jdbcType=VARCHAR},
+            </if>
+            <if test="executeTime != null">
+                #{executeTime,jdbcType=BIGINT},
+            </if>
+            <if test="createdTime != null">
+                #{createdTime,jdbcType=BIGINT},
+            </if>
+            <if test="updatedTime != null">
+                #{updatedTime,jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
+    <update id="modifyTaskRecordById" parameterType="pxf.tlx.basesystem.data.entity.TaskRecord">
+        update base_task_record
+        set task_no      = #{taskNo,jdbcType=VARCHAR},
+            time_key     = #{timeKey,jdbcType=VARCHAR},
+            `status`     = #{status,jdbcType=TINYINT},
+            fail_count   = #{failCount,jdbcType=INTEGER},
+            fail_reason  = #{failReason,jdbcType=VARCHAR},
+            execute_time = #{executeTime,jdbcType=BIGINT},
+            created_time = #{createdTime,jdbcType=BIGINT},
+            updated_time = #{updatedTime,jdbcType=BIGINT}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="modifyTaskRecordByIdSelective" parameterType="pxf.tlx.basesystem.data.entity.TaskRecord">
+        update base_task_record
+        <set>
+            <if test="taskNo != null">
+                task_no = #{taskNo,jdbcType=VARCHAR},
+            </if>
+            <if test="timeKey != null">
+                time_key = #{timeKey,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                `status` = #{status,jdbcType=TINYINT},
+            </if>
+            <if test="failCount != null">
+                fail_count = #{failCount,jdbcType=INTEGER},
+            </if>
+            <if test="failReason != null">
+                fail_reason = #{failReason,jdbcType=VARCHAR},
+            </if>
+            <if test="executeTime != null">
+                execute_time = #{executeTime,jdbcType=BIGINT},
+            </if>
+            <if test="createdTime != null">
+                created_time = #{createdTime,jdbcType=BIGINT},
+            </if>
+            <if test="updatedTime != null">
+                updated_time = #{updatedTime,jdbcType=BIGINT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+</mapper>

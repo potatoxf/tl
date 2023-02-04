@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pxf.tlx.basesystem.data.mapper.AccessMapper">
+
+    <!--********************************* Menu *********************************-->
+
+    <resultMap id="RM_Menu" type="pxf.tlx.basesystem.data.entity.AccessMenu">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="pid" jdbcType="INTEGER" property="pid"/>
+        <result column="designation" jdbcType="VARCHAR" property="designation"/>
+        <result column="title" jdbcType="VARCHAR" property="title"/>
+        <result column="way" jdbcType="VARCHAR" property="way"/>
+        <result column="redirect" jdbcType="VARCHAR" property="redirect"/>
+        <result column="permission" jdbcType="VARCHAR" property="permission" typeHandler="pxf.tlx.mybatis.type.StringSetTypeHandler"/>
+        <result column="link_id" jdbcType="INTEGER" property="linkId"/>
+        <result column="icon" jdbcType="VARCHAR" property="icon"/>
+        <result column="ord" jdbcType="INTEGER" property="ord"/>
+        <result column="created_time" jdbcType="BIGINT" property="createdTime"/>
+        <result column="updated_time" jdbcType="BIGINT" property="updatedTime"/>
+    </resultMap>
+    <resultMap id="RM_MenuInfo" type="pxf.tlx.basesystem.data.entity.AccessMenu">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="pid" jdbcType="INTEGER" property="pid"/>
+        <result column="designation" jdbcType="VARCHAR" property="designation"/>
+        <result column="title" jdbcType="VARCHAR" property="title"/>
+        <result column="way" jdbcType="VARCHAR" property="way"/>
+        <result column="redirect" jdbcType="VARCHAR" property="redirect"/>
+        <result column="permission" jdbcType="VARCHAR" property="permission" typeHandler="pxf.tlx.mybatis.type.StringSetTypeHandler"/>
+        <result column="link_id" jdbcType="INTEGER" property="linkId"/>
+        <result column="icon" jdbcType="VARCHAR" property="icon"/>
+        <result column="ord" jdbcType="INTEGER" property="ord"/>
+        <result column="created_time" jdbcType="BIGINT" property="createdTime"/>
+        <result column="updated_time" jdbcType="BIGINT" property="updatedTime"/>
+        <association property="accessLink" javaType="pxf.tlx.basesystem.data.entity.AccessLink">
+            <id column="link_id" jdbcType="INTEGER" property="id"/>
+            <result column="host" jdbcType="VARCHAR" property="host"/>
+            <result column="port" jdbcType="INTEGER" property="port"/>
+            <result column="path" jdbcType="VARCHAR" property="path"/>
+            <result column="method_type" jdbcType="VARCHAR" property="methodType"/>
+            <result column="created_time" jdbcType="BIGINT" property="createdTime"/>
+            <result column="updated_time" jdbcType="BIGINT" property="updatedTime"/>
+        </association>
+    </resultMap>
+    <sql id="Menu_Columns">
+        id, pid, designation, title, way, redirect, permission, link_id, icon, ord, created_time, updated_time
+    </sql>
+    <sql id="Menu_Link_Columns">
+        m.id, m.pid, m.designation, m.title, m.way, m.redirect, m.permission, m.link_id, m.icon, m.ord, m.created_time, m.updated_time, l.host, l.port, l.path, l.method_type
+    </sql>
+    <select id="lookupMenuInfo" parameterType="java.lang.String" resultMap="RM_MenuInfo">
+        select
+        <include refid="Menu_Link_Columns"/>
+        from base_menu m
+        left join base_link l
+        on m.link_id = l.id
+        <where>
+            <if test="condition != null and condition.size() != 0">
+                <if test="condition.text != null and condition.text != ''">
+                    and (l.host like '%#{condition.text}%' or l.path like '%#{condition.text}%' or l.method_type like '%#{condition.text}%' or m.designation like '%#{condition.text}%' or m.title like '%#{condition.text}%' or m.way like '%#{condition.text}%' or m.redirect like '%#{condition.text}%')
+                </if>
+                <if test="condition.host != null">
+                    and l.host like '%#{condition.host}%'
+                </if>
+                <if test="condition.path != null">
+                    and l.path like '%#{condition.path}%'
+                </if>
+                <if test="condition.port != null">
+                    and l.port = #{condition.port}
+                </if>
+                <if test="condition.methodType != null">
+                    and l.method_type like '%#{condition.methodType}%'
+                </if>
+                <if test="condition.designation != null">
+                    and m.designation like '%#{condition.designation}%'
+                </if>
+                <if test="condition.title != null">
+                    and m.title like '%#{condition.title}%'
+                </if>
+                <if test="condition.way != null">
+                    and m.way like '%#{condition.way}%'
+                </if>
+                <if test="condition.redirect != null">
+                    and m.redirect like '%#{condition.redirect}%'
+                </if>
+            </if>
+        </where>
+        order by m.ord
+    </select>
+    <select id="getMenuInfoMapByOrgId" parameterType="java.util.List" resultMap="RM_MenuInfo">
+        select distinct
+        <include refid="Menu_Link_Columns"/>
+        from base_menu m
+        left join base_link l
+        on m.link_id=l.id
+        left join base_org_access oa
+        on oa.menu_id=m.id
+        <where>
+            <if test="collection != null and collection.size() != 0">
+                oa.id in <foreach collection="collection" item="item" open="(" separator="," close=")" nullable="false">#{item,jdbcType=INTEGER}</foreach>
+            </if>
+            <if test="collection == null or collection.size() == 0">
+                1=2
+            </if>
+        </where>
+        order by m.ord asc
+    </select>
+    <select id="getMenuInfoMapByAccountId" parameterType="java.lang.String" resultMap="RM_MenuInfo">
+        select distinct
+        <include refid="Menu_Link_Columns"/>
+        from base_menu m
+        left join base_link l
+        on m.link_id=l.id
+        left join base_org_access oa
+        on oa.menu_id=m.id
+        where exists (select o.id from base_org o where oa.id = o.id and account_id=#{accountId,jdbcType=VARCHAR})
+        order by m.ord asc
+    </select>
+    <select id="getMenuInfoById" parameterType="java.lang.Integer" resultMap="RM_MenuInfo">
+        select
+        <include refid="Menu_Link_Columns"/>
+        from base_menu m
+        left join base_link l
+        on m.link_id = l.id
+        where m.id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="getMenuById" parameterType="java.lang.Integer" resultMap="RM_Menu">
+        select
+        <include refid="Menu_Columns"/>
+        from base_menu
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="removeMenu" parameterType="java.lang.Integer">
+        delete
+        from base_menu
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="addMenu" parameterType="pxf.tlx.basesystem.data.entity.AccessMenu">
+        insert into base_menu (<include refid="Menu_Columns"/>)
+        values (#{id,jdbcType=INTEGER}, #{pid,jdbcType=INTEGER}, #{designation,jdbcType=VARCHAR}, #{title,jdbcType=VARCHAR}, #{way,jdbcType=VARCHAR}, #{redirect,jdbcType=VARCHAR}, #{permission,jdbcType=VARCHAR}, #{linkId,jdbcType=INTEGER}, #{icon,jdbcType=VARCHAR}, #{ord,jdbcType=INTEGER}, #{createdTime,jdbcType=BIGINT}, #{updatedTime,jdbcType=BIGINT})
+    </insert>
+    <insert id="addMenuSelective" parameterType="pxf.tlx.basesystem.data.entity.AccessMenu">
+        insert into base_menu
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="pid != null">
+                pid,
+            </if>
+            <if test="designation != null">
+                designation,
+            </if>
+            <if test="title != null">
+                title,
+            </if>
+            <if test="way != null">
+                way,
+            </if>
+            <if test="redirect != null">
+                redirect,
+            </if>
+            <if test="permission != null">
+                permission,
+            </if>
+            <if test="linkId != null">
+                link_id,
+            </if>
+            <if test="icon != null">
+                icon,
+            </if>
+            <if test="ord != null">
+                ord,
+            </if>
+            <if test="createdTime != null">
+                created_time,
+            </if>
+            <if test="updatedTime != null">
+                updated_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="pid != null">
+                #{pid,jdbcType=INTEGER},
+            </if>
+            <if test="designation != null">
+                #{designation,jdbcType=VARCHAR},
+            </if>
+            <if test="title != null">
+                #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="way != null">
+                #{way,jdbcType=VARCHAR},
+            </if>
+            <if test="redirect != null">
+                #{redirect,jdbcType=VARCHAR},
+            </if>
+            <if test="permission != null">
+                #{permission,jdbcType=VARCHAR},
+            </if>
+            <if test="linkId != null">
+                #{linkId,jdbcType=INTEGER},
+            </if>
+            <if test="icon != null">
+                #{icon,jdbcType=VARCHAR},
+            </if>
+            <if test="ord != null">
+                #{ord,jdbcType=INTEGER},
+            </if>
+            <if test="createdTime != null">
+                #{createdTime,jdbcType=BIGINT},
+            </if>
+            <if test="updatedTime != null">
+                #{updatedTime,jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
+    <update id="modifyMenuById" parameterType="pxf.tlx.basesystem.data.entity.AccessMenu">
+        update base_menu
+        set pid          = #{pid,jdbcType=INTEGER},
+            designation  = #{designation,jdbcType=VARCHAR},
+            title        = #{title,jdbcType=VARCHAR},
+            way          = #{way,jdbcType=VARCHAR},
+            redirect     = #{redirect,jdbcType=VARCHAR},
+            permission   = #{permission,jdbcType=VARCHAR},
+            link_id      = #{linkId,jdbcType=INTEGER},
+            icon         = #{icon,jdbcType=VARCHAR},
+            ord          = #{ord,jdbcType=INTEGER},
+            created_time = #{createdTime,jdbcType=BIGINT},
+            updated_time = #{updatedTime,jdbcType=BIGINT}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="modifyMenuByIdSelective" parameterType="pxf.tlx.basesystem.data.entity.AccessMenu">
+        update base_menu
+        <set>
+            <if test="pid != null">
+                pid = #{pid,jdbcType=INTEGER},
+            </if>
+            <if test="designation != null">
+                designation = #{designation,jdbcType=VARCHAR},
+            </if>
+            <if test="title != null">
+                title = #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="way != null">
+                way = #{way,jdbcType=VARCHAR},
+            </if>
+            <if test="redirect != null">
+                redirect = #{redirect,jdbcType=VARCHAR},
+            </if>
+            <if test="permission != null">
+                permission = #{permission,jdbcType=VARCHAR},
+            </if>
+            <if test="linkId != null">
+                link_id = #{linkId,jdbcType=INTEGER},
+            </if>
+            <if test="icon != null">
+                icon = #{icon,jdbcType=VARCHAR},
+            </if>
+            <if test="ord != null">
+                ord = #{ord,jdbcType=INTEGER},
+            </if>
+            <if test="createdTime != null">
+                created_time = #{createdTime,jdbcType=BIGINT},
+            </if>
+            <if test="updatedTime != null">
+                updated_time = #{updatedTime,jdbcType=BIGINT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <!--********************************* Link *********************************-->
+    <resultMap id="RM_Link" type="pxf.tlx.basesystem.data.entity.AccessLink">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="host" jdbcType="VARCHAR" property="host"/>
+        <result column="port" jdbcType="INTEGER" property="port"/>
+        <result column="path" jdbcType="VARCHAR" property="path"/>
+        <result column="method_type" jdbcType="VARCHAR" property="methodType"/>
+        <result column="created_time" jdbcType="BIGINT" property="createdTime"/>
+        <result column="updated_time" jdbcType="BIGINT" property="updatedTime"/>
+    </resultMap>
+    <sql id="Link_Columns">
+        id,
+        host,
+        port,
+        path,
+        method_type,
+        created_time,
+        updated_time
+    </sql>
+    <select id="lookupLink" parameterType="java.lang.String" resultMap="RM_Link">
+        select
+        <include refid="Link_Columns"/>
+        from base_link
+        <where>
+            <if test="condition != null and condition.size() != 0">
+                <if test="condition.text != null and condition.text != ''">
+                    and (host like '%#{condition.text}%' or path like '%#{condition.text}%' or method_type like '%#{condition.text}%')
+                </if>
+                <if test="condition.host != null">
+                    and host like '%#{condition.host}%'
+                </if>
+                <if test="condition.path != null">
+                    and path like '%#{condition.path}%'
+                </if>
+                <if test="condition.port != null">
+                    and port = #{condition.port}
+                </if>
+                <if test="condition.methodType != null">
+                    and method_type like '%#{condition.methodType}%'
+                </if>
+            </if>
+        </where>
+    </select>
+    <select id="getLinkById" parameterType="java.lang.Integer" resultMap="RM_Link">
+        select
+        <include refid="Link_Columns"/>
+        from base_link
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="removeLink" parameterType="java.lang.Integer">
+        delete
+        from base_link
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="addLink" parameterType="pxf.tlx.basesystem.data.entity.AccessLink">
+        insert into base_link (id, host, port,
+                            path, method_type, created_time,
+                            updated_time)
+        values (#{id,jdbcType=INTEGER}, #{host,jdbcType=VARCHAR}, #{port,jdbcType=INTEGER},
+                #{path,jdbcType=VARCHAR}, #{methodType,jdbcType=VARCHAR}, #{createdTime,jdbcType=BIGINT},
+                #{updatedTime,jdbcType=BIGINT})
+    </insert>
+    <insert id="addLinkSelective" parameterType="pxf.tlx.basesystem.data.entity.AccessLink">
+        insert into base_link
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="host != null">
+                host,
+            </if>
+            <if test="port != null">
+                port,
+            </if>
+            <if test="path != null">
+                path,
+            </if>
+            <if test="methodType != null">
+                method_type,
+            </if>
+            <if test="createdTime != null">
+                created_time,
+            </if>
+            <if test="updatedTime != null">
+                updated_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="host != null">
+                #{host,jdbcType=VARCHAR},
+            </if>
+            <if test="port != null">
+                #{port,jdbcType=INTEGER},
+            </if>
+            <if test="path != null">
+                #{path,jdbcType=VARCHAR},
+            </if>
+            <if test="methodType != null">
+                #{methodType,jdbcType=VARCHAR},
+            </if>
+            <if test="createdTime != null">
+                #{createdTime,jdbcType=BIGINT},
+            </if>
+            <if test="updatedTime != null">
+                #{updatedTime,jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
+    <update id="modifyLinkById" parameterType="pxf.tlx.basesystem.data.entity.AccessLink">
+        update base_link
+        set host         = #{host,jdbcType=VARCHAR},
+            port         = #{port,jdbcType=INTEGER},
+            path          = #{path,jdbcType=VARCHAR},
+            method_type  = #{methodType,jdbcType=VARCHAR},
+            created_time = #{createdTime,jdbcType=BIGINT},
+            updated_time = #{updatedTime,jdbcType=BIGINT}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="modifyLinkByIdSelective" parameterType="pxf.tlx.basesystem.data.entity.AccessLink">
+        update base_link
+        <set>
+            <if test="host != null">
+                host = #{host,jdbcType=VARCHAR},
+            </if>
+            <if test="port != null">
+                port = #{port,jdbcType=INTEGER},
+            </if>
+            <if test="path != null">
+                path = #{path,jdbcType=VARCHAR},
+            </if>
+            <if test="methodType != null">
+                method_type = #{methodType,jdbcType=VARCHAR},
+            </if>
+            <if test="createdTime != null">
+                created_time = #{createdTime,jdbcType=BIGINT},
+            </if>
+            <if test="updatedTime != null">
+                updated_time = #{updatedTime,jdbcType=BIGINT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <!--********************************* Org *********************************-->
+
+    <resultMap id="RM_Org" type="pxf.tlx.basesystem.data.entity.Org">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="pid" jdbcType="INTEGER" property="pid"/>
+        <result column="perm" jdbcType="VARCHAR" property="perm"/>
+        <result column="designation" jdbcType="VARCHAR" property="designation"/>
+        <result column="category" jdbcType="TINYINT" property="category"/>
+        <result column="account_id" jdbcType="VARCHAR" property="accountId"/>
+        <result column="created_time" jdbcType="BIGINT" property="createdTime"/>
+        <result column="updated_time" jdbcType="BIGINT" property="updatedTime"/>
+    </resultMap>
+    <sql id="Org_Columns">
+        id, pid, perm, designation, category, account_id, created_time, updated_time
+    </sql>
+    <select id="getOrgMap" resultMap="RM_Org">
+        select
+        <include refid="Org_Columns"/>
+        from base_org
+    </select>
+    <select id="getOrgList" resultMap="RM_Org">
+        select
+        <include refid="Org_Columns"/>
+        from base_org
+    </select>
+    <select id="getOrgChildrenList" parameterType="java.lang.Integer" resultMap="RM_Org">
+        select
+        <include refid="Org_Columns"/>
+        from base_org
+        where pid = #{pid,jdbcType=INTEGER}
+    </select>
+    <select id="getOrgListByAccountId" parameterType="java.lang.String" resultMap="RM_Org">
+        select
+        <include refid="Org_Columns"/>
+        from base_org
+        where account_id = #{accountId,jdbcType=VARCHAR}
+    </select>
+    <select id="getOrgById" parameterType="java.lang.Integer" resultMap="RM_Org">
+        select
+        <include refid="Org_Columns"/>
+        from base_org
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <delete id="removeOrgById" parameterType="java.lang.Integer">
+        delete
+        from base_org
+        where id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="addOrg" parameterType="pxf.tlx.basesystem.data.entity.Org">
+        insert into base_org (<include refid="Org_Columns"/>)
+        values (#{id,jdbcType=INTEGER}, #{pid,jdbcType=INTEGER}, #{perm,jdbcType=VARCHAR},
+                #{designation,jdbcType=VARCHAR}, #{category,jdbcType=TINYINT}, #{accountId,jdbcType=VARCHAR},
+                #{createdTime,jdbcType=BIGINT}, #{updatedTime,jdbcType=BIGINT})
+    </insert>
+    <insert id="addOrgSelective" parameterType="pxf.tlx.basesystem.data.entity.Org">
+        insert into base_org
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="pid != null">
+                pid,
+            </if>
+            <if test="perm != null">
+                perm,
+            </if>
+            <if test="designation != null">
+                designation,
+            </if>
+            <if test="category != null">
+                category,
+            </if>
+            <if test="accountId != null">
+                account_id,
+            </if>
+            <if test="createdTime != null">
+                created_time,
+            </if>
+            <if test="updatedTime != null">
+                updated_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="pid != null">
+                #{pid,jdbcType=INTEGER},
+            </if>
+            <if test="perm != null">
+                #{perm,jdbcType=VARCHAR},
+            </if>
+            <if test="designation != null">
+                #{designation,jdbcType=VARCHAR},
+            </if>
+            <if test="category != null">
+                #{category,jdbcType=TINYINT},
+            </if>
+            <if test="accountId != null">
+                #{accountId,jdbcType=VARCHAR},
+            </if>
+            <if test="createdTime != null">
+                #{createdTime,jdbcType=BIGINT},
+            </if>
+            <if test="updatedTime != null">
+                #{updatedTime,jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
+    <update id="modifyOrgById" parameterType="pxf.tlx.basesystem.data.entity.Org">
+        update base_org
+        set pid          = #{pid,jdbcType=INTEGER},
+            perm         = #{perm,jdbcType=VARCHAR},
+            designation         = #{designation,jdbcType=VARCHAR},
+            category     = #{category,jdbcType=TINYINT},
+            account_id   = #{accountId,jdbcType=VARCHAR},
+            created_time = #{createdTime,jdbcType=BIGINT},
+            updated_time = #{updatedTime,jdbcType=BIGINT}
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="modifyOrgByIdSelective" parameterType="pxf.tlx.basesystem.data.entity.Org">
+        update base_org
+        <set>
+            <if test="pid != null">
+                pid = #{pid,jdbcType=INTEGER},
+            </if>
+            <if test="perm != null">
+                perm = #{perm,jdbcType=VARCHAR},
+            </if>
+            <if test="designation != null">
+                designation = #{designation,jdbcType=VARCHAR},
+            </if>
+            <if test="category != null">
+                category = #{category,jdbcType=TINYINT},
+            </if>
+            <if test="accountId != null">
+                account_id = #{accountId,jdbcType=VARCHAR},
+            </if>
+            <if test="createdTime != null">
+                created_time = #{createdTime,jdbcType=BIGINT},
+            </if>
+            <if test="updatedTime != null">
+                updated_time = #{updatedTime,jdbcType=BIGINT},
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+
+    <!--********************************* OrgAccess *********************************-->
+    <resultMap id="RM_OrgAccess" type="pxf.tlx.basesystem.data.entity.OrgAccess">
+        <id column="id" jdbcType="INTEGER" property="id"/>
+        <result column="menu_id" jdbcType="INTEGER" property="menuId"/>
+        <result column="menu_select" jdbcType="BOOLEAN" property="menuSelect"/>
+        <result column="menu_delete" jdbcType="BOOLEAN" property="menuDelete"/>
+        <result column="menu_insert" jdbcType="BOOLEAN" property="menuInsert"/>
+        <result column="menu_update" jdbcType="BOOLEAN" property="menuUpdate"/>
+        <result column="menu_report" jdbcType="BOOLEAN" property="menuReport"/>
+        <result column="created_time" jdbcType="BIGINT" property="createdTime"/>
+        <result column="updated_time" jdbcType="BIGINT" property="updatedTime"/>
+    </resultMap>
+    <sql id="OrgAccess_Columns">
+        id, menu_id, menu_select, menu_delete, menu_insert, menu_update, menu_report, created_time, updated_time
+    </sql>
+    <delete id="removeOrgAccessByOrgId" parameterType="java.lang.Integer">
+        delete
+        from base_org_access
+        where id = #{orgId,jdbcType=INTEGER}
+    </delete>
+    <delete id="removeOrgAccessByMenuId" parameterType="java.lang.Integer">
+        delete
+        from base_org_access
+        where menu_id = #{menuId,jdbcType=INTEGER}
+    </delete>
+    <delete id="removeOrgAccess">
+        delete
+        from base_org_access
+        where id = #{orgId,jdbcType=INTEGER}
+          and menu_id = #{menuId,jdbcType=INTEGER}
+    </delete>
+    <insert id="addOrgAccess" parameterType="pxf.tlx.basesystem.data.entity.OrgAccess">
+        insert into base_org_access (<include refid="OrgAccess_Columns"/>)
+        values (#{id,jdbcType=INTEGER}, #{menuId,jdbcType=INTEGER}, #{createdTime,jdbcType=BIGINT}, #{updatedTime,jdbcType=BIGINT})
+    </insert>
+</mapper>

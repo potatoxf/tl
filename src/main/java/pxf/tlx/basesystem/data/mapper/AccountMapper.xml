@@ -1,0 +1,627 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="pxf.tlx.basesystem.data.mapper.AccountMapper">
+    <resultMap id="RM_AccountInfo" type="pxf.tlx.basesystem.data.entity.Account">
+        <id column="id" jdbcType="VARCHAR" property="id" />
+        <result column="token" jdbcType="VARCHAR" property="token" />
+        <result column="pwd" jdbcType="VARCHAR" property="pwd" />
+        <result column="nickname" jdbcType="VARCHAR" property="nickname" />
+        <result column="fpy" jdbcType="VARCHAR" property="fpy" />
+        <result column="spy" jdbcType="VARCHAR" property="spy" />
+        <result column="email" jdbcType="VARCHAR" property="email" />
+        <result column="phone" jdbcType="VARCHAR" property="phone" />
+        <result column="error" jdbcType="BOOLEAN" property="error" />
+        <result column="locked" jdbcType="BOOLEAN" property="locked" />
+        <result column="delete_flag" jdbcType="BOOLEAN" property="deleteFlag" />
+        <result column="status_flag" jdbcType="BOOLEAN" property="statusFlag" />
+        <result column="revision" jdbcType="INTEGER" property="revision" />
+        <result column="created_by" jdbcType="VARCHAR" property="createdBy" />
+        <result column="created_time" jdbcType="TIMESTAMP" property="createdTime" />
+        <result column="updated_by" jdbcType="VARCHAR" property="updatedBy" />
+        <result column="updated_time" jdbcType="TIMESTAMP" property="updatedTime" />
+        <collection property="accountPropList" column="id" ofType="pxf.tlx.basesystem.data.entity.AccountProp">
+            <result property="id" column="id" jdbcType="VARCHAR" />
+            <result property="catalog" column="catalog" jdbcType="VARCHAR" />
+            <result property="designation" column="nickname" jdbcType="VARCHAR" />
+            <result property="valueData" column="value_data" jdbcType="VARCHAR" />
+        </collection>
+    </resultMap>
+    <resultMap id="RM_Account" type="pxf.tlx.basesystem.data.entity.Account">
+        <id column="id" jdbcType="VARCHAR" property="id" />
+        <result column="token" jdbcType="VARCHAR" property="token" />
+        <result column="pwd" jdbcType="VARCHAR" property="pwd" />
+        <result column="nickname" jdbcType="VARCHAR" property="nickname" />
+        <result column="fpy" jdbcType="VARCHAR" property="fpy" />
+        <result column="spy" jdbcType="VARCHAR" property="spy" />
+        <result column="email" jdbcType="VARCHAR" property="email" />
+        <result column="phone" jdbcType="VARCHAR" property="phone" />
+        <result column="error" jdbcType="BOOLEAN" property="error" />
+        <result column="locked" jdbcType="BOOLEAN" property="locked" />
+        <result column="delete_flag" jdbcType="BOOLEAN" property="deleteFlag" />
+        <result column="status_flag" jdbcType="BOOLEAN" property="statusFlag" />
+        <result column="revision" jdbcType="INTEGER" property="revision" />
+        <result column="created_by" jdbcType="VARCHAR" property="createdBy" />
+        <result column="created_time" jdbcType="TIMESTAMP" property="createdTime" />
+        <result column="updated_by" jdbcType="VARCHAR" property="updatedBy" />
+        <result column="updated_time" jdbcType="TIMESTAMP" property="updatedTime" />
+    </resultMap>
+
+    <sql id="Account_Columns">
+        id, token, pwd, nickname, fpy, spy, email, phone, error, locked, delete_flag, status_flag, revision, created_by, created_time, updated_by, updated_time
+    </sql>
+
+    <select id="lookupAccountData" resultType="pxf.tl.collection.map.CaseInsensitiveMap">
+        select
+        <if test="columnList == null or columnList.size() == 0">
+            *
+        </if>
+        <if test="columnList != null and columnList.size() != 0">
+            <foreach collection="columnList" item="column" separator=", ">
+                ${column}
+            </foreach>
+        </if>
+        from base_account
+        <where>
+            <if test="condition != null and condition.size() != 0">
+                <if test="condition.text != null and condition.text != ''">
+                    and (nickname like '%#{condition.text}%'
+                        or fpy like '%#{condition.text}%'
+                        or spy like '%#{condition.text}%'
+                        or email like '%#{condition.text}%'
+                        or phone like '%#{condition.text}%')
+                </if>
+                <if test="condition.token != null">
+                    and token = #{condition.token}
+                </if>
+                <if test="condition.designation != null">
+                    and nickname like '%#{condition.designation}%'
+                </if>
+                <if test="condition.email != null">
+                    and (email like '%#{condition.email}%'
+                            or id in (select id
+                                      from base_account_prop ap
+                                      where ap.catalog = 'ACCOUNT_INFO'
+                                        and ap.designation = 'EMAIL'
+                                        and ap.value_data like '%#{condition.email}%'
+                                        and ap.id = a.id)
+                            )
+                </if>
+                <if test="condition.phone != null">
+                    and phone like '%#{condition.phone}%'
+                </if>
+            </if>
+        </where>
+    </select>
+
+    <select id="lookupAccount" parameterType="java.lang.String" resultMap="RM_Account">
+        select
+        <include refid="Account_Columns" />
+        from base_account a
+        <where>
+            <if test="condition != null and condition.size() != 0">
+                <if test="condition.text != null and condition.text != ''">
+                    and (nickname like '%#{condition.text}%'
+                        or fpy like '%#{condition.text}%'
+                        or spy like '%#{condition.text}%'
+                        or email like '%#{condition.text}%'
+                        or phone like '%#{condition.text}%')
+                </if>
+                <if test="condition.token != null">
+                    and token = #{condition.token}
+                </if>
+                <if test="condition.designation != null">
+                    and nickname like '%#{condition.designation}%'
+                </if>
+                <if test="condition.email != null">
+                    and (email like '%#{condition.email}%'
+                            or id in (select id
+                                      from base_account_prop ap
+                                      where ap.catalog = 'ACCOUNT_INFO'
+                                        and ap.designation = 'EMAIL'
+                                        and ap.value_data like '%#{condition.email}%')
+                            )
+                </if>
+                <if test="condition.phone != null">
+                    and phone like '%#{condition.phone}%'
+                </if>
+            </if>
+        </where>
+    </select>
+
+    <select id="countEmail" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(1)
+        from base_account a
+        left join base_account_prop ap
+        on a.id = ap.id
+        where a.email = #{email,jdbcType=VARCHAR}
+        or (ap.catalog = 'ACCOUNT_INFO' and ap.designation = 'EMAIL' and ap.value_data = #{email,jdbcType=VARCHAR})
+    </select>
+
+    <select id="countPhone" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(1)
+        from base_account a
+        left join base_account_prop ap
+        on a.id = ap.id
+        where a.phone = #{phone,jdbcType=VARCHAR}
+        or (ap.catalog = 'ACCOUNT_INFO' and ap.designation = 'PHONE' and ap.value_data = #{phone,jdbcType=VARCHAR})
+    </select>
+
+    <select id="getUpperAccount" resultMap="RM_Account">
+        <if test="levels.length == 0">
+            select *
+            from base_account
+            where id = #{idOrToken,jdbcType=VARCHAR}
+               or token = #{idOrToken,jdbcType=VARCHAR}
+        </if>
+        <if test="levels.length != 0">
+            select m${levels[levels.length-1]}.*
+            from (select *
+                  from base_account
+                  where id = #{idOrToken,jdbcType=VARCHAR}
+                     or token = #{idOrToken,jdbcType=VARCHAR}) main
+            <foreach collection="levels" item="item" index="index">
+                <if test="index == 0">
+                    inner join base_account m${item} on main.pid = m${item}.id
+                </if>
+                <if test="index != 0">
+                    inner join base_account m${item} on m${levels[index-1]}.pid = m${item}.id
+                </if>
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getAccount" parameterType="java.lang.String" resultMap="RM_Account">
+        select *
+        from base_account
+        where id = #{idOrToken,jdbcType=VARCHAR}
+           or token = #{idOrToken,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getAccountInfo" parameterType="java.lang.String" resultMap="RM_AccountInfo">
+        select a.*, ap.catalog, ap.designation, ap.value_data
+        from base_account a
+        left join base_account_prop ap
+        on a.id = ap.id
+        where a.id = #{idOrToken,jdbcType=VARCHAR}
+           or a.token = #{idOrToken,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getAccountByEmail" parameterType="java.lang.String" resultMap="RM_Account">
+        select *
+        from base_account
+        where email = #{email,jdbcType=VARCHAR}
+        or id in (select id from base_account_prop where catalog = 'ACCOUNT_INFO' and designation = 'EMAIL' and value_data = #{email,jdbcType=VARCHAR})
+    </select>
+
+    <select id="getAccountInfoByEmail" parameterType="java.lang.String" resultMap="RM_AccountInfo">
+        select a.*, ap.catalog, ap.designation, ap.value_data
+        from base_account a
+        left join base_account_prop ap
+        on a.id = ap.id
+        where email = #{email,jdbcType=VARCHAR}
+        or id in (select id from base_account_prop where catalog = 'ACCOUNT_INFO' and designation = 'EMAIL' and value_data = #{email,jdbcType=VARCHAR})
+    </select>
+
+    <select id="getAccountByPhone" parameterType="java.lang.String" resultMap="RM_Account">
+        select *
+        from base_account
+        where phone = #{phone,jdbcType=VARCHAR}
+        or id in (select id from base_account_prop where catalog = 'ACCOUNT_INFO' and designation = 'PHONE' and value_data = #{phone,jdbcType=VARCHAR})
+    </select>
+
+    <select id="getAccountInfoByPhone" parameterType="java.lang.String" resultMap="RM_AccountInfo">
+        select a.*, ap.catalog, ap.designation, ap.value_data
+        from base_account a
+        left join base_account_prop ap
+        on a.id = ap.id
+        where phone = #{phone,jdbcType=VARCHAR}
+        or id in (select id from base_account_prop where catalog = 'ACCOUNT_INFO' and designation = 'PHONE' and value_data = #{phone,jdbcType=VARCHAR})
+    </select>
+
+    <insert id="addAccount" parameterType="pxf.tlx.basesystem.data.entity.Account">
+        insert into base_account (<include refid="Account_Columns" />)
+            values (#{id}, #{token}, #{pwd}, #{nickname}, #{fpy}, #{spy}, #{email}, #{phone}, #{error}, #{locked},
+                    #{deleteFlag}, #{statusFlag}, #{revision}, #{createdBy}, #{createdTime}, #{updatedBy}, #{updatedTime})
+    </insert>
+
+    <insert id="addAccountSelective" parameterType="pxf.tlx.basesystem.data.entity.Account">
+        insert into base_account
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="token != null">
+                token,
+            </if>
+            <if test="pwd != null">
+                pwd,
+            </if>
+            <if test="nickname != null">
+                nickname,
+            </if>
+            <if test="fpy != null">
+                fpy,
+            </if>
+            <if test="spy != null">
+                spy,
+            </if>
+            <if test="email != null">
+                email,
+            </if>
+            <if test="phone != null">
+                phone,
+            </if>
+            <if test="error != null">
+                error,
+            </if>
+            <if test="locked != null">
+                locked,
+            </if>
+            <if test="deleteFlag != null">
+                delete_flag,
+            </if>
+            <if test="statusFlag != null">
+                status_flag,
+            </if>
+            <if test="revision != null">
+                revision,
+            </if>
+            <if test="createdBy != null">
+                created_by,
+            </if>
+            <if test="createdTime != null">
+                created_time,
+            </if>
+            <if test="updatedBy != null">
+                updated_by,
+            </if>
+            <if test="updatedTime != null">
+                updated_time,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id},
+            </if>
+            <if test="token != null">
+                #{token},
+            </if>
+            <if test="pwd != null">
+                #{pwd},
+            </if>
+            <if test="nickname != null">
+                #{nickname},
+            </if>
+            <if test="fpy != null">
+                #{fpy},
+            </if>
+            <if test="spy != null">
+                #{spy},
+            </if>
+            <if test="email != null">
+                #{email},
+            </if>
+            <if test="phone != null">
+                #{phone},
+            </if>
+            <if test="error != null">
+                #{error},
+            </if>
+            <if test="locked != null">
+                #{locked},
+            </if>
+            <if test="deleteFlag != null">
+                #{deleteFlag},
+            </if>
+            <if test="statusFlag != null">
+                #{statusFlag},
+            </if>
+            <if test="revision != null">
+                #{revision},
+            </if>
+            <if test="createdBy != null">
+                #{createdBy},
+            </if>
+            <if test="createdTime != null">
+                #{createdTime},
+            </if>
+            <if test="updatedBy != null">
+                #{updatedBy},
+            </if>
+            <if test="updatedTime != null">
+                #{updatedTime},
+            </if>
+        </trim>
+    </insert>
+
+    <insert id="addAccountBatched" parameterType="java.util.List">
+        insert into base_account (<include refid="Account_Columns" />) values
+        <foreach collection="list" item="item" separator="," open="values">
+            (#{item.id}, #{item.token}, #{item.pwd},#{item.nickname}, #{item.fpy}, #{item.spy}, #{item.email}, #{item.phone}, #{item.error}, #{item.locked},#{item.deleteFlag}, #{item.statusFlag}, #{item.revision}, #{item.createdBy}, #{item.createdTime},#{item.updatedBy}, #{item.updatedTime})
+        </foreach>
+    </insert>
+
+    <insert id="addAccountBatched" parameterType="java.util.List" databaseId="oracle">
+        <foreach collection="list" item="item" open="begin " close=" end;" separator=" ">
+            insert into base_account ( <include refid="Account_Columns" />) values
+            #{item.id}, #{item.token}, #{item.pwd},#{item.nickname}, #{item.fpy}, #{item.spy}, #{item.email}, #{item.phone}, #{item.error}, #{item.locked},#{item.deleteFlag}, #{item.statusFlag}, #{item.revision},#{item.createdBy}, #{item.createdTime}, #{item.updatedBy}, #{item.updatedTime});
+        </foreach>
+    </insert>
+
+    <update id="modifyAccountById" parameterType="pxf.tlx.basesystem.data.entity.Account">
+        update base_account
+        set token        = #{token},
+            pwd          = #{pwd},
+            nickname     = #{nickname},
+            fpy          = #{fpy},
+            spy          = #{spy},
+            email        = #{email},
+            phone        = #{phone},
+            error        = #{error},
+            locked       = #{locked},
+            delete_flag  = #{deleteFlag},
+            status_flag  = #{statusFlag},
+            revision     = #{revision},
+            created_by   = #{createdBy},
+            created_time = #{createdTime},
+            updated_by   = #{updatedBy},
+            updated_time = #{updatedTime}
+        where id = #{id}
+    </update>
+
+    <update id="modifyAccountByIdSelective" parameterType="pxf.tlx.basesystem.data.entity.Account">
+        update base_account
+        <set>
+            <if test="token != null">
+                token = #{token},
+            </if>
+            <if test="pwd != null">
+                pwd = #{pwd},
+            </if>
+            <if test="nickname != null">
+                nickname = #{nickname},
+            </if>
+            <if test="fpy != null">
+                fpy = #{fpy},
+            </if>
+            <if test="spy != null">
+                spy = #{spy},
+            </if>
+            <if test="email != null">
+                email = #{email},
+            </if>
+            <if test="phone != null">
+                phone = #{phone},
+            </if>
+            <if test="error != null">
+                error = #{error},
+            </if>
+            <if test="locked != null">
+                locked = #{locked},
+            </if>
+            <if test="deleteFlag != null">
+                delete_flag = #{deleteFlag},
+            </if>
+            <if test="statusFlag != null">
+                status_flag = #{statusFlag},
+            </if>
+            <if test="revision != null">
+                revision = #{revision},
+            </if>
+            <if test="createdBy != null">
+                created_by = #{createdBy},
+            </if>
+            <if test="createdTime != null">
+                created_time = #{createdTime},
+            </if>
+            <if test="updatedBy != null">
+                updated_by = #{updatedBy},
+            </if>
+            <if test="updatedTime != null">
+                updated_time = #{updatedTime},
+            </if>
+        </set>
+        where id = #{id}
+    </update>
+
+    <update id="modifyAccountBatched" parameterType="java.util.List">
+        update base_account
+        <trim prefix="set" suffixOverrides=",">
+            <trim prefix="token = case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    when id = #{item.id} then #{item.token}
+                </foreach>
+            </trim>
+            <trim prefix="pwd = case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    when id = #{item.id} then #{item.pwd}
+                </foreach>
+            </trim>
+            <trim prefix="nickname = case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    when id = #{item.id} then #{item.nickname}
+                </foreach>
+            </trim>
+            <trim prefix="fpy = case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    when id = #{item.id} then #{item.fpy}
+                </foreach>
+            </trim>
+            <trim prefix="spy = case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    when id = #{item.id} then #{item.spy}
+                </foreach>
+            </trim>
+            <trim prefix="email = case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    when id = #{item.id} then #{item.email}
+                </foreach>
+            </trim>
+            <trim prefix="phone = case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    when id = #{item.id} then #{item.phone}
+                </foreach>
+            </trim>
+            <trim prefix="error = case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    when id = #{item.id} then #{item.error}
+                </foreach>
+            </trim>
+            <trim prefix="locked = case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    when id = #{item.id} then #{item.locked}
+                </foreach>
+            </trim>
+            <trim prefix="delete_flag = case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    when id = #{item.id} then #{item.deleteFlag}
+                </foreach>
+            </trim>
+            <trim prefix="status_flag = case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    when id = #{item.id} then #{item.statusFlag}
+                </foreach>
+            </trim>
+            <trim prefix="revision = case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    when id = #{item.id} then #{item.revision}
+                </foreach>
+            </trim>
+            <trim prefix="created_by = case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    when id = #{item.id} then #{item.createdBy}
+                </foreach>
+            </trim>
+            <trim prefix="created_time = case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    when id = #{item.id} then #{item.createdTime}
+                </foreach>
+            </trim>
+            <trim prefix="updated_by = case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    when id = #{item.id} then #{item.updatedBy}
+                </foreach>
+            </trim>
+            <trim prefix="updated_time = case" suffix="end,">
+                <foreach collection="list" index="index" item="item">
+                    when id = #{item.id} then #{item.updatedTime}
+                </foreach>
+            </trim>
+        </trim>
+        where id in
+        <foreach collection="list" item="item" open="(" close=")" separator=", ">
+            #{item.id}
+        </foreach>
+    </update>
+
+    <delete id="removeAccount" parameterType="java.lang.String">
+        delete
+        from base_account
+        where id = #{id}
+    </delete>
+
+    <!--***************************************************登录记录***************************************************-->
+
+    <resultMap id="RM_AccountConLog" type="pxf.tlx.basesystem.data.entity.AccountConLog">
+        <id column="id" jdbcType="VARCHAR" property="id"/>
+        <result column="ip" jdbcType="VARCHAR" property="ip"/>
+        <result column="machine" jdbcType="VARCHAR" property="machine"/>
+        <result column="agent" jdbcType="VARCHAR" property="agent"/>
+        <result column="methods" jdbcType="TINYINT" property="methods"/>
+        <result column="created_time" jdbcType="BIGINT" property="createdTime"/>
+        <result column="updated_time" jdbcType="BIGINT" property="updatedTime"/>
+    </resultMap>
+
+    <sql id="AccountConLog_Columns">
+        id, ip, machine, agent, methods, create_time, update_time
+    </sql>
+
+    <select id="listAccountConLog" resultMap="RM_AccountConLog">
+        select
+        <include refid="AccountConLog_Columns" />
+        from base_account_con_log
+        where id = #{id,jdbcType=VARCHAR}
+        <if test="condition.fromTimestamp != null">
+            and created_time >= #{condition.fromTimestamp,jdbcType=BIGINT}
+        </if>
+    </select>
+
+    <insert id="addAccountConLog" parameterType="pxf.tlx.basesystem.data.entity.AccountConLog">
+        insert into base_account_con_log (<include refid="AccountConLog_Columns" />)
+        values (#{id,jdbcType=VARCHAR}, #{ip,jdbcType=VARCHAR}, #{machine,jdbcType=VARCHAR}, #{agent,jdbcType=VARCHAR}, #{methods,jdbcType=TINYINT}, #{createTime,jdbcType=BIGINT}, #{updateTime,jdbcType=BIGINT})
+    </insert>
+
+    <!--***************************************************密码历史***************************************************-->
+
+    <select id="getAccountPasswordHistoryCount" resultType="java.lang.Integer">
+        select count(*)
+        from base_account_pwd_his
+        where created_time >= #{fromTimestamp,jdbcType=BIGINT}
+          and password = #{password,jdbcType=VARCHAR}
+          and id = #{id,jdbcType=VARCHAR}
+    </select>
+
+    <insert id="addAccountPasswordHistory">
+        insert into base_account_pwd_his (id, pwd, created_time, updated_time)
+        values (#{accountPwdHis.id,jdbcType=VARCHAR}, #{accountPwdHis.pwd,jdbcType=VARCHAR}, #{accountPwdHis.createdTime,jdbcType=BIGINT}, #{accountPwdHis.updatedTime,jdbcType=BIGINT});
+    </insert>
+
+
+    <!--***************************************************属性处理***************************************************-->
+
+    <insert id="addAccountProp" parameterType="pxf.tlx.basesystem.data.entity.AccountProp">
+        insert into base_account_prop (id, catalog, designation, value_data)
+        values (#{id,jdbcType=VARCHAR}, #{catalog,jdbcType=VARCHAR}, #{designation,jdbcType=VARCHAR}, #{value_data,jdbcType=VARCHAR})
+    </insert>
+
+    <update id="modifyAccountProp" parameterType="pxf.tlx.basesystem.data.entity.AccountProp">
+        update base_account_prop
+        set value_data=#{value_data,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=VARCHAR}
+          and catalog = #{catalog,jdbcType=VARCHAR}
+          and designation = #{designation,jdbcType=VARCHAR}
+    </update>
+
+    <select id="existsAccountPropValue" resultType="java.lang.Boolean">
+        select count(0)
+        from base_account_prop
+        where id = #{id,jdbcType=VARCHAR}
+          and catalog = #{catalog,jdbcType=VARCHAR}
+          and designation = #{designation,jdbcType=VARCHAR}
+    </select>
+
+    <select id="getAccountPropValue" resultType="java.lang.String">
+        select value_data
+        from base_account_prop
+        where id = #{id,jdbcType=VARCHAR}
+          and catalog = #{catalog,jdbcType=VARCHAR}
+          and designation = #{designation,jdbcType=VARCHAR}
+    </select>
+
+    <insert id="addAccountPropValue">
+        insert into base_account_prop (id, catalog, designation, value_data)
+        values (#{id,jdbcType=VARCHAR}, #{catalog,jdbcType=VARCHAR}, #{designation,jdbcType=VARCHAR}, #{value_data,jdbcType=VARCHAR})
+    </insert>
+
+    <update id="modifyAccountPropValue">
+        update base_account_prop
+        set value_data=#{value_data,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=VARCHAR}
+          and catalog = #{catalog,jdbcType=VARCHAR}
+          and designation = #{designation,jdbcType=VARCHAR}
+    </update>
+
+    <delete id="removeAccountPropValue">
+        delete
+        from base_account_prop
+        where id = #{id,jdbcType=VARCHAR}
+          and catalog = #{catalog,jdbcType=VARCHAR}
+          and designation = #{designation,jdbcType=VARCHAR}
+    </delete>
+
+    <delete id="clearAccountProp">
+        delete
+        from base_account_prop
+        where id = #{id,jdbcType=VARCHAR}
+    </delete>
+</mapper>
